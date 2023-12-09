@@ -1,0 +1,13 @@
+[
+  {
+    "listing": "/index.html",
+    "items": [
+      "/posts/linearRegression/index.html",
+      "/posts/probability/index.html",
+      "/posts/anomaly detecter/index.html",
+      "/posts/classification/index.html",
+      "/posts/nonlinearRegression/index.html",
+      "/posts/clustering/index.html"
+    ]
+  }
+]

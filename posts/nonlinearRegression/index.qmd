@@ -1,0 +1,260 @@
+---
+title: "Nonlinear Regression"
+author: "Rahul Pulluri"
+date: "2023-10-28"
+image: "sphx_glr_plot_curve_fitting_001.png"
+---
+
+![](sphx_glr_plot_curve_fitting_001.png)
+
+## Definition
+
+Non-linear regression in machine learning is a powerful tool for modeling complex relationships between variables, where these relationships cannot be adequately described using a straight line. In machine learning, non-linear regression is used to predict outcomes based on non-linear interactions of predictor variables. It's particularly useful in scenarios where the underlying data patterns are inherently non-linear.
+
+## Mathematical Formulation
+
+The general form of a non-linear regression model is: Y = f(X, β) + ε
+
+- Y is the dependent variable.
+
+- X is the independent variable.
+
+- β represents the parameters of the model.
+
+- f is a non-linear function.
+
+- ε is the error term.
+
+
+## Characteristics
+
+**Nature of Relationship:** Unlike linear regression, where the relationship between variables is a straight line, non-linear regression deals with data where the relationship is curvilinear. This means the graph of the relationship forms a curve, not a straight line.
+
+**Types of Non-Linear Relationships:** Relationships can be exponential, logarithmic, power, or more complex types.
+For instance, a common non-linear model is the exponential growth model, represented as:
+
+- Y = a * e^(bX)
+
+- Here, e is the base of the natural logarithm, a and b are model parameters, Y is the dependent variable, and X is the independent variable. 
+
+**Flexibility:** Non-linear regression can model more complex relationships and patterns in data compared to linear models. It’s more flexible in fitting data curves, but this comes with the cost of increased complexity in calculation and interpretation.
+
+## Types of Non-linear Models:
+
+**Polynomial Regression:** Extends linear models by adding polynomial terms, making the model curve.
+
+**Decision Trees and Random Forests:** Can model non-linear relationships by splitting the data into branches based on decision rules.
+
+**Neural Networks:** Highly capable of capturing non-linear relationships through layers of neurons with non-linear activation functions.
+
+**Support Vector Machines with Non-linear Kernels:** Use kernel functions (like RBF) to project data into higher dimensions where it is linearly separable.
+
+## Applications
+
+**Scientific Data:** Often used in scientific data where the rate of change of a variable accelerates or decelerates rapidly, or where the effect of an independent variable is not proportional over its range.
+
+**Growth Curves:** Common in biological systems, such as modeling population growth or the spread of diseases.
+
+**Economic Data:** Used in economics for functions like utility curves, supply/demand curves.
+
+## Examples of Nonlinear Regression
+
+**I.Introduction**
+
+When you're looking at data that seems to form curves or non-straight patterns, using linear regression might not give you the most accurate results. Linear regression is like a tool designed for straight-line relationships, so when your data behaves in a curvy way, it doesn't quite fit the tool's assumptions. That's where non-linear regression steps in. It's like having a set of tools that can handle curves and bends in the data. These tools, like polynomial, exponential, or logarithmic regression, can adjust to the data's curves and complexities, giving you more precise predictions and a better match to the real nature of the data.
+
+## 1. Linear
+
+```{python}
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the linear function (e.g., L(x) = ax + b)
+a, b = 2, 1
+
+# Generate x values
+x = np.linspace(0, 5, 100)
+
+# Calculate the corresponding y values using the linear function
+y = a * x + b
+
+# Generate random data points with noise
+np.random.seed(0)
+noise = np.random.normal(0, 0.5, len(x))
+data_y = y + noise
+
+# Plot the linear function and data points
+plt.plot(x, y, label='Linear Function', color='blue')
+plt.scatter(x, data_y, label='Data Points', color='red', alpha=0.5)
+plt.xlabel('x')
+plt.ylabel('L(x)')
+plt.title('Linear Function')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+```
+
+## 2. Polynomial
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define coefficients of the polynomial equation (e.g., P(x) = ax^3 + bx^2 + cx + d)
+a, b, c, d = 1, -3, 3, -1
+
+# Generate x values
+x = np.linspace(-2, 2, 100)
+
+# Calculate the corresponding y values using the polynomial equation
+y = a * x**3 + b * x**2 + c * x + d
+
+# Generate random data points with noise
+np.random.seed(0)
+noise = np.random.normal(0, 0.2, len(x))
+data_y = y + noise
+
+# Plot the polynomial function and data points
+plt.plot(x, y, label='Polynomial Function', color='blue')
+plt.scatter(x, data_y, label='Data Points', color='red', alpha=0.5)
+plt.xlabel('x')
+plt.ylabel('P(x)')
+plt.title('Polynomial Function')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+```
+
+## 3. Quadratic
+
+```{python}
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define coefficients of the quadratic equation (e.g., Q(x) = ax^2 + bx + c)
+a, b, c = 1, -2, 1
+
+# Generate x values
+x = np.linspace(-2, 3, 100)
+
+# Calculate the corresponding y values using the quadratic equation
+y = a * x**2 + b * x + c
+
+# Generate random data points with noise
+np.random.seed(0)
+noise = np.random.normal(0, 0.2, len(x))
+data_y = y + noise
+
+# Plot the quadratic function and data points
+plt.plot(x, y, label='Quadratic Function', color='blue')
+plt.scatter(x, data_y, label='Data Points', color='red', alpha=0.5)
+plt.xlabel('x')
+plt.ylabel('Q(x)')
+plt.title('Quadratic Function')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+```
+
+## 4. Exponential
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the exponential function (e.g., E(x) = a * e^(bx))
+a, b = 1, 0.5
+
+# Generate x values
+x = np.linspace(0, 5, 100)
+
+# Calculate the corresponding y values using the exponential function
+y = a * np.exp(b * x)
+
+# Generate random data points with noise
+np.random.seed(0)
+noise = np.random.normal(0, 0.2, len(x))
+data_y = y + noise
+
+# Plot the exponential function and data points
+plt.plot(x, y, label='Exponential Function', color='blue')
+plt.scatter(x, data_y, label='Data Points', color='red', alpha=0.5)
+plt.xlabel('x')
+plt.ylabel('E(x)')
+plt.title('Exponential Function')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+```
+
+## 5. Logarithmic
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the logarithmic function (e.g., L(x) = a * ln(bx))
+a, b = 1, 2
+
+# Generate x values
+x = np.linspace(0.1, 5, 100)
+
+# Calculate the corresponding y values using the logarithmic function
+y = a * np.log(b * x)
+
+# Generate random data points with noise
+np.random.seed(0)
+noise = np.random.normal(0, 0.2, len(x))
+data_y = y + noise
+
+# Plot the logarithmic function and data points
+plt.plot(x, y, label='Logarithmic Function', color='blue')
+plt.scatter(x, data_y, label='Data Points', color='red', alpha=0.5)
+plt.xlabel('x')
+plt.ylabel('L(x)')
+plt.title('Logarithmic Function')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+```
+
+## 6. Sigmoidal/Logistic
+
+```{python}
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the sigmoidal/logistic function (e.g., S(x) = 1 / (1 + e^(-x)))
+x = np.linspace(-5, 5, 100)
+
+# Calculate the corresponding y values using the sigmoidal/logistic function
+y = 1 / (1 + np.exp(-x))
+
+# Generate random data points with noise
+np.random.seed(0)
+noise = np.random.normal(0, 0.05, len(x))
+data_y = y + noise
+
+# Plot the sigmoidal/logistic function and data points
+plt.plot(x, y, label='Sigmoidal/Logistic Function', color='blue')
+plt.scatter(x, data_y, label='Data Points', color='red', alpha=0.5)
+plt.xlabel('x')
+plt.ylabel('S(x)')
+plt.title('Sigmoidal/Logistic')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+```
+
