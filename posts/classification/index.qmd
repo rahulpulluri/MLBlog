@@ -171,7 +171,7 @@ import seaborn
 **Data recuperation**
 
 ```{python}
-data = pd.read_csv('R:/Blog/posts/classification/creditcard.csv') # Reading the file .csv
+data = pd.read_csv('R:/MLBlog/posts/classification/creditcard.csv') # Reading the file .csv
 df = pd.DataFrame(data) # Converting data to Panda DataFrame
 ```
 

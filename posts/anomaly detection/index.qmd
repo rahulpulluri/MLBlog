@@ -93,7 +93,7 @@ from torch.utils.data import DataLoader, Dataset
 
 ```{python}
 
-df = pd.read_csv("R:/Blog/posts/anomaly detecter/weight-height.csv")
+df = pd.read_csv("R:/MLBlog/posts/anomaly detection/weight-height.csv")
 FEATURE_COLUMNS = ['Height', 'Weight']
 print(df.shape)
 df.sample(5).T
