@@ -2,7 +2,7 @@
 title: "Classification"
 author: "Rahul Pulluri"
 date: "2023-11-19"
-image: "classification_main.jpeg"
+image: "classification.png"
 jupyter: python3
 
 ---
