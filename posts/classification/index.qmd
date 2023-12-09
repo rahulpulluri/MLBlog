@@ -139,276 +139,255 @@ Small changes in data can lead to a different tree.
 
 Applications: Used in customer segmentation, fraud detection, and risk assessment.
 
-## Example: Credit Card Fraud Detection
+## Example: Spam Classification with Naive Bayes and Support Vector Machine
 
 ```{python}
 
-#Importing librairies
-
-import pandas as pd 
 import numpy as np
-
-# Scikit-learn library: For SVM
-from sklearn import preprocessing
-from sklearn.metrics import confusion_matrix
-from sklearn import svm
-
-import itertools
-
-# Matplotlib library to plot the charts
-import matplotlib.pyplot as plt
-import matplotlib.mlab as mlab
-
-# Library for the statistic data vizualisation
-import seaborn
-
-%matplotlib inline
-
-
-
-```
-
-**Data recuperation**
-
-```{python}
-data = pd.read_csv('R:/MLBlog/posts/classification/creditcard.csv') # Reading the file .csv
-df = pd.DataFrame(data) # Converting data to Panda DataFrame
-```
-
-**Data Visualization**
-
-```{python}
-df = pd.DataFrame(data) # Converting data to Panda DataFrame
-```
-
-```{python}
-df.describe() # Description of statistic features (Sum, Average, Variance, minimum, 1st quartile, 2nd quartile, 3rd Quartile and Maximum)
-```
-
-
-```{python}
-df_fraud = df[df['Class'] == 1] # Recovery of fraud data
-plt.figure(figsize=(15,10))
-plt.scatter(df_fraud['Time'], df_fraud['Amount']) # Display fraud amounts according to their time
-plt.title('Scratter plot amount fraud')
-plt.xlabel('Time')
-plt.ylabel('Amount')
-plt.xlim([0,175000])
-plt.ylim([0,2500])
-plt.show()
-```
-
-```{python}
-nb_big_fraud = df_fraud[df_fraud['Amount'] > 1000].shape[0] # Recovery of frauds over 1000
-print('There are only '+ str(nb_big_fraud) + ' frauds where the amount was bigger than 1000 over ' + str(df_fraud.shape[0]) + ' frauds')
-```
-
-There are only 9 frauds where the amount was bigger than 1000 over 492 frauds
-
--   Unbalanced data
-
-```{python}
-number_fraud = len(data[data.Class == 1])
-number_no_fraud = len(data[data.Class == 0])
-print('There are only '+ str(number_fraud) + ' frauds in the original dataset, even though there are ' + str(number_no_fraud) +' no frauds in the dataset.')
-```
-
-There are only 492 frauds in the original dataset, even though there are 284315 no frauds in the dataset.
-
-```{python}
-print("The accuracy of the classifier then would be : "+ str((284315-492)/284315)+ " which is the number of good classification over the number of tuple to classify")
-```
-
-**Correlation of features**
-
-```{python}
-df_corr = df.corr() # Calculation of the correlation coefficients in pairs, with the default method:
-                    # Pearson, Standard Correlation Coefficient
-```
-
-```{python}
-plt.figure(figsize=(15,10))
-seaborn.heatmap(df_corr, cmap="YlGnBu") # Displaying the Heatmap
-seaborn.set(font_scale=2,style='white')
-
-plt.title('Heatmap correlation')
-plt.show()
-```
-
-As we can notice, most of the features are not correlated with each other. This corroborates the fact that a PCA was previously performed on the data.
-
-What can generally be done on a massive dataset is a dimension reduction. By picking th emost important dimensions, there is a possiblity of explaining most of the problem, thus gaining a considerable amount of time while preventing the accuracy to drop too much.
-
-However in this case given the fact that a PCA was previously performed, if the dimension reduction is effective then the PCA wasn't computed in the most effective way. Another way to put it is that no dimension reduction should be computed on a dataset on which a PCA was computed correctly.
-
-**Correlation of features**
-
-OVERSAMPLING
-
-One way to do oversampling is to replicate the under-represented class tuples until we attain a correct proportion between the class
-
-However as we haven't infinite time nor the patience, we are going to run the classifier with the undersampled training data (for those using the undersampling principle if results are really bad just rerun the training dataset definition)
-
-UNDERSAMPLING
-
-```{python}
 import pandas as pd
-# We seperate ours data in two groups : a train dataset and a test dataset
-
-# First we build our train dataset
-df_train_all = df[0:150000] # We cut in two the original dataset
-df_train_1 = df_train_all[df_train_all['Class'] == 1] # We seperate the data which are the frauds and the no frauds
-df_train_0 = df_train_all[df_train_all['Class'] == 0]
-print('In this dataset, we have ' + str(len(df_train_1)) +" frauds so we need to take a similar number of non-fraud")
-
-df_sample=df_train_0.sample(300)
-combined_df = pd.concat([df_train_1, df_sample], ignore_index=True) # We gather the frauds with the no frauds. 
-combined_df = combined_df.sample(frac=1) # Then we mix our dataset
-
+import matplotlib.pyplot as plt
+from collections import Counter
+from sklearn import feature_extraction, model_selection, naive_bayes, metrics, svm
+from IPython.display import Image
+import warnings
+warnings.filterwarnings("ignore")
+%matplotlib inline  
 ```
 
-In this dataset, we have 293 frauds so we need to take a similar number of non-fraud
+**Exploring the Dataset**
 
 ```{python}
-X_train = combined_df.drop(['Time', 'Class'], axis=1)  # Drop the features "Time" (useless) and "Class" (label)
-y_train = combined_df['Class']  # Create the label
-X_train = np.asarray(X_train)
-y_train = np.asarray(y_train)
+data = pd.read_csv('R:/MLBlog/posts/classification/spam.csv', encoding='latin-1')
+data.head(n=10)
 ```
 
-```{python}
-############################## with all the test dataset to see if the model learn correctly ##################
-df_test_all = df[150000:]
-
-X_test_all = df_test_all.drop(['Time', 'Class'],axis=1)
-y_test_all = df_test_all['Class']
-X_test_all = np.asarray(X_test_all)
-```
-
-**Confusion Matrix**
+**Distribution spam/non-spam plots**
 
 ```{python}
-class_names=np.array(['0','1']) # Binary label, Class = 1 (fraud) and Class = 0 (no fraud)
-
+count_Class=pd.value_counts(data["v1"], sort= True)
+count_Class.plot(kind= 'bar', color= ["blue", "orange"])
+plt.title('Bar chart')
+plt.show()
 ```
 
 ```{python}
-# Function to plot the confusion Matrix
-def plot_confusion_matrix(cm, classes,
-                          title='Confusion matrix',
-                          cmap=plt.cm.Blues):
-    
-    plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
-    plt.colorbar()
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
-    plt.yticks(tick_marks, classes)
-
-    fmt = 'd' 
-    thresh = cm.max() / 2.
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, format(cm[i, j], fmt),
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
-
-    plt.tight_layout()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
+count_Class.plot(kind = 'pie',  autopct='%1.0f%%')
+plt.title('Pie chart')
+plt.ylabel('')
+plt.show()
 ```
 
-**Model Selection**
+**Text Analytics**
 
-So now, we'll use a SVM model classifier, with the scikit-learn library.
+We want to find the frequencies of words in the spam and non-spam messages. The words of the messages will be model features.
+
+We use the function Counter.
 
 ```{python}
-classifier = svm.SVC(kernel='linear') # We set a SVM classifier, the default SVM Classifier (Kernel = Radial Basis Function)
+count1 = Counter(" ".join(data[data['v1']=='ham']["v2"]).split()).most_common(20)
+df1 = pd.DataFrame.from_dict(count1)
+df1 = df1.rename(columns={0: "words in non-spam", 1 : "count"})
+count2 = Counter(" ".join(data[data['v1']=='spam']["v2"]).split()).most_common(20)
+df2 = pd.DataFrame.from_dict(count2)
+df2 = df2.rename(columns={0: "words in spam", 1 : "count_"})
 ```
 
 ```{python}
-classifier.fit(X_train, y_train) # Then we train our model, with our balanced data train.
-
+df1.plot.bar(legend = False)
+y_pos = np.arange(len(df1["words in non-spam"]))
+plt.xticks(y_pos, df1["words in non-spam"])
+plt.title('More frequent words in non-spam messages')
+plt.xlabel('words')
+plt.ylabel('number')
+plt.show()
 ```
-
-**Testing the model**
 
 
 ```{python}
-prediction_SVM_all = classifier.predict(X_test_all) #And finally, we predict our data test.
-
+df2.plot.bar(legend = False, color = 'orange')
+y_pos = np.arange(len(df2["words in spam"]))
+plt.xticks(y_pos, df2["words in spam"])
+plt.title('More frequent words in spam messages')
+plt.xlabel('words')
+plt.ylabel('number')
+plt.show()
 ```
+
+We can see that the majority of frequent words in both classes are stop words such as 'to', 'a', 'or' and so on.
+
+With stop words we refer to the most common words in a lenguage, there is no simgle, universal list of stop words.
+
+**Feature engineering**
+
+Text preprocessing, tokenizing and filtering of stopwords are included in a high level component that is able to build a dictionary of features and transform documents to feature vectors.
+
+We remove the stop words in order to improve the analytics
 
 ```{python}
-cm = confusion_matrix(y_test_all, prediction_SVM_all)
-plot_confusion_matrix(cm,class_names)
+f = feature_extraction.text.CountVectorizer(stop_words = 'english')
+X = f.fit_transform(data["v2"])
+np.shape(X)
 ```
 
-In this case we are gonna try to minimize the number of errors in our prediction results. Errors are on the anti-diagonal of the confusion matrix. But we can infer that being wrong about an actual fraud is far worse than being wrong about a non-fraud transaction.
+We have created more than 8400 new features. The new feature  j
+  in the row  i
+  is equal to 1 if the word  wj
+  appears in the text example  i
+ . It is zero if not.
 
-That is why using the accuracy as only classification criterion could be considered unthoughtful. During the remaining part of this study our criterion will consider precision on the real fraud 4 times more important than the general accuracy. Even though the final tested result is accuracy.
+**Predictive Analysis**
+
+My goal is to predict if a new sms is spam or non-spam. I assume that is much worse misclassify non-spam than misclassify an spam. (I don't want to have false positives)
+
+The reason is because I normally don't check the spam messages.
+
+The two possible situations are:
+
+1. New spam sms in my inbox. (False negative).
+OUTCOME: I delete it.
+
+2. New non-spam sms in my spam folder (False positive).
+OUTCOME: I probably don't read it.
+
+I prefer the first option!!!
+
+First we transform the variable spam/non-spam into binary variable, then we split our data set in training set and test set.
 
 ```{python}
-print('Our criterion give a result of ' 
-      + str( ( (cm[0][0]+cm[1][1]) / (sum(cm[0]) + sum(cm[1])) + 4 * cm[1][1]/(cm[1][0]+cm[1][1])) / 5))
+data["v1"]=data["v1"].map({'spam':1,'ham':0})
+X_train, X_test, y_train, y_test = model_selection.train_test_split(X, data['v1'], test_size=0.33, random_state=42)
+print([np.shape(X_train), np.shape(X_test)])
 ```
 
-Our criterion give a result of 0.905383035408
+**Multinomial naive bayes classifier**
+
+We train different bayes models changing the regularization parameter α.
+
+We evaluate the accuracy, recall and precision of the model with the test set.
 
 ```{python}
-print('We have detected ' + str(cm[1][1]) + ' frauds / ' + str(cm[1][1]+cm[1][0]) + ' total frauds.')
-print('\nSo, the probability to detect a fraud is ' + str(cm[1][1]/(cm[1][1]+cm[1][0])))
-print("the accuracy is : "+str((cm[0][0]+cm[1][1]) / (sum(cm[0]) + sum(cm[1]))))
+list_alpha = np.arange(1/100000, 20, 0.11)
+score_train = np.zeros(len(list_alpha))
+score_test = np.zeros(len(list_alpha))
+recall_test = np.zeros(len(list_alpha))
+precision_test= np.zeros(len(list_alpha))
+count = 0
+for alpha in list_alpha:
+    bayes = naive_bayes.MultinomialNB(alpha=alpha)
+    bayes.fit(X_train, y_train)
+    score_train[count] = bayes.score(X_train, y_train)
+    score_test[count]= bayes.score(X_test, y_test)
+    recall_test[count] = metrics.recall_score(y_test, bayes.predict(X_test))
+    precision_test[count] = metrics.precision_score(y_test, bayes.predict(X_test))
+    count = count + 1 
+```
+
+Let's see the first 10 learning models and their metrics!
+
+```{python}
+matrix = np.matrix(np.c_[list_alpha, score_train, score_test, recall_test, precision_test])
+models = pd.DataFrame(data = matrix, columns = 
+             ['alpha', 'Train Accuracy', 'Test Accuracy', 'Test Recall', 'Test Precision'])
+models.head(n=10)
 
 ```
 
-We have detected 177 frauds / 199 total frauds.
+I select the model with the most test precision
 
-So, the probability to detect a fraud is 0.889447236181
-the accuracy is : 0.969126232317
+```{python}
+best_index = models['Test Precision'].idxmax()
+models.iloc[best_index, :]
+```
 
-**Models Rank**
+My best model does not produce any false positive, which is our goal.
 
-There is a need to compute the fit method again, as the dimension of the tuples to predict went from 29 to 10 because of the dimension reduction
+Let's see if there is more than one model with 100% precision !
 
+```{python}
+models[models['Test Precision']==1].head(n=5)
+```
+
+Between these models with the highest possible precision, we are going to select which has more test accuracy.
+
+```{python}
+best_index = models[models['Test Precision']==1]['Test Accuracy'].idxmax()
+bayes = naive_bayes.MultinomialNB(alpha=list_alpha[best_index])
+bayes.fit(X_train, y_train)
+models.iloc[best_index, :]
+```
+
+Confusion matrix with naive bayes classifier
+
+```{python}
+m_confusion_test = metrics.confusion_matrix(y_test, bayes.predict(X_test))
+pd.DataFrame(data = m_confusion_test, columns = ['Predicted 0', 'Predicted 1'],
+            index = ['Actual 0', 'Actual 1'])
+```
+
+We misclassify 56 spam messages as non-spam emails whereas we don't misclassify any non-spam message.
+
+**Support Vector Machine**
+
+We are going to apply the same reasoning applying the support vector machine model with the gaussian kernel.
+
+We train different models changing the regularization parameter C.
+
+We evaluate the accuracy, recall and precision of the model with the test set.
+
+```{python}
+list_C = np.arange(500, 2000, 100) #100000
+score_train = np.zeros(len(list_C))
+score_test = np.zeros(len(list_C))
+recall_test = np.zeros(len(list_C))
+precision_test= np.zeros(len(list_C))
+count = 0
+for C in list_C:
+    svc = svm.SVC(C=C)
+    svc.fit(X_train, y_train)
+    score_train[count] = svc.score(X_train, y_train)
+    score_test[count]= svc.score(X_test, y_test)
+    recall_test[count] = metrics.recall_score(y_test, svc.predict(X_test))
+    precision_test[count] = metrics.precision_score(y_test, svc.predict(X_test))
+    count = count + 1 
+```
+
+Let's see the first 10 learning models and their metrics!
+
+```{python}
+matrix = np.matrix(np.c_[list_C, score_train, score_test, recall_test, precision_test])
+models = pd.DataFrame(data = matrix, columns = 
+             ['C', 'Train Accuracy', 'Test Accuracy', 'Test Recall', 'Test Precision'])
+models.head(n=10)
+
+```
+
+I select the model with the most test precision
 
 
 ```{python}
-# Define a simple feature ranking function (you can customize this)
-def rank_features(data):
-    # Implement your feature ranking logic here
-    ranked_features = data  # Replace this with your actual feature ranking code
-    return ranked_features
-
-# Now you can use the rank_features function
-X_train_rank = rank_features(X_train)
-X_test_all_rank = rank_features(X_test_all)
-
-
+best_index = models['Test Precision'].idxmax()
+models.iloc[best_index, :]
 ```
+
+My best model does not produce any false positive, which is our goal.
+
+
+Confusion matrix with support vector machine classifier.
 
 ```{python}
-prediction_SVM = classifier.predict(X_test_all_rank)
+m_confusion_test = metrics.confusion_matrix(y_test, svc.predict(X_test))
+pd.DataFrame(data = m_confusion_test, columns = ['Predicted 0', 'Predicted 1'],
+            index = ['Actual 0', 'Actual 1'])
+
 ```
 
-```{python}
-cm = confusion_matrix(y_test_all, prediction_SVM)
-plot_confusion_matrix(cm,class_names)
-```
-```{python}
-print('Our criterion give a result of ' 
-      + str( ( (cm[0][0]+cm[1][1]) / (sum(cm[0]) + sum(cm[1])) + 4 * cm[1][1]/(cm[1][0]+cm[1][1])) / 5))
-```
+We misclassify 37 spam as non-spam messages whereas we don't misclassify any non-spam message.
 
-Our criterion give a result of 0.912995958898
+**Conclusion**
 
-```{python}
-print('We have detected ' + str(cm[1][1]) + ' frauds / ' + str(cm[1][1]+cm[1][0]) + ' total frauds.')
-print('\nSo, the probability to detect a fraud is ' + str(cm[1][1]/(cm[1][1]+cm[1][0])))
-print("the accuracy is : "+str((cm[0][0]+cm[1][1]) / (sum(cm[0]) + sum(cm[1]))))
-```
+The best model I have found is support vector machine with 98.3% accuracy.
 
-We have detected 179 frauds / 199 total frauds.
+It classifies every non-spam message correctly (Model precision)
 
-So, the probability to detect a fraud is 0.899497487437
-the accuracy is : 0.966989844741
+It classifies the 87.7% of spam messages correctly (Model recall)
 
