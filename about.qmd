@@ -17,9 +17,5 @@ about:
 ---
 
 ::: {#hero-heading}
-I am Rahul Pulluri and I am from India.
-
-Pursuing Masters in Computer Science at [Virginia Tech](https://www.vt.edu/).  As a Master of Engineering student in Computer Science at Virginia Tech, I am deeply immersed in the transformative world of Machine Learning (ML). My academic focus is on unraveling the complexities of ML algorithms and techniques, understanding their theoretical foundations, and exploring their vast potential in practical applications. This journey is driven by a fascination with how ML can revolutionize data analysis and decision-making across various sectors. My studies involve a thorough exploration of the principles behind these advanced algorithms, enabling me to grasp how they can be effectively applied to real-world scenarios.
-
-The MEng program at Virginia Tech is instrumental in shaping my expertise in ML. It provides a balanced mix of rigorous academic learning and practical, hands-on experience, allowing me to apply theoretical knowledge to tangible problems. This approach not only enhances my understanding of machine learning but also prepares me to contribute meaningfully in this field. Through this program, I am honing my skills to become an innovative practitioner in ML, capable of leveraging this technology to create impactful, ethical, and forward-thinking solutions in various domains, including digital health and beyond.
+I'm Rahul Pulluri from India, currently pursuing a Master's in Computer Science at [Virginia Tech](https://www.vt.edu/), with a deep immersion in Machine Learning (ML) and a keen interest in Computer Vision. My academic journey involves mastering ML algorithms, understanding their theoretical underpinnings, and applying them in real-world scenarios, especially in Computer Vision. The MEng program at Virginia Tech is molding me into an innovative ML practitioner, capable of creating impactful solutions across various domains. My goal is to leverage the power of ML and Computer Vision to revolutionize data analysis and decision-making, contributing ethical and forward-thinking advancements in technology.
 :::
